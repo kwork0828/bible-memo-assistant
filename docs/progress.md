@@ -6,34 +6,23 @@
 - Terminal: Windows Terminal / PowerShell
 - Python: 집 PC 3.13.15, 노트북 3.14.7에서 필수 패키지 import 확인
 - Git / GitHub 사용 중
-- 현재 작업 브랜치: `feat/firebase`
+- 최신 통합 작업 브랜치: `feat/frontend`
 - GitHub 저장소: `kwork0828/bible-memo-assistant`
 - 저장소 공개 여부: Public
 
 ---
 
-## 2. 완료된 작업
+## 2. 완료·구현 상태
 
-### 환경 및 Git
+### 1단계 환경 및 Git — 검증 완료
 
 - 프로젝트 폴더 및 Git 저장소 초기화
-- `feat/setup`, `feat/api`, `feat/firebase` 브랜치 구성
+- `feat/setup`, `feat/api`, `feat/firebase`, `feat/firestore-api`, `feat/ai-chat`, `feat/frontend` 브랜치 구성
 - `.venv`, `.gitignore`, `AGENTS.md`, `docs/progress.md` 구성
 - GitHub Public 저장소 및 `origin` 연결
 - `.env`, `.venv`, Firebase 서비스 계정 키 Git 제외 규칙 확인
 
-### Python 환경
-
-- 필수 패키지 설치
-  - fastapi
-  - uvicorn
-  - firebase-admin
-  - openai
-  - python-dotenv
-- `backend/requirements.txt` 생성
-- `backend/.env.example` 생성 및 Firebase/AI 환경변수 예시 정리
-
-### 영어성경 암송 일정 생성
+### 2단계 암송 일정 생성 — 로컬 검증 완료
 
 - `scripts/verses.txt` 생성
 - World English Bible(WEB) 개발 테스트 구절 5개 준비
@@ -43,8 +32,9 @@
 - 신규 학습과 복습 데이터 분리
 - 100개 미만 데이터 경고 구현
 - Python 3.13.15에서 문법 검사 및 실행 성공
+- 현재 5개 구절 테스트에서는 100개 이상 최종 제출 데이터 요건은 아직 미충족
 
-### FastAPI 기본 서버
+### 3단계 FastAPI 기본 서버 — 로컬 검증 완료
 
 - `backend/main.py` 생성
 - FastAPI 애플리케이션 생성
@@ -53,40 +43,123 @@
 - Swagger `/docs`, `/openapi.json` 정상 동작 확인
 - CORS 허용 주소를 환경변수 `ALLOWED_ORIGINS`에서 읽도록 변경
 
-### Firebase / Firestore
+### 4단계 Firebase / Firestore — 코드 준비 완료, 실제 연결 재검증 필요
 
 - Firebase 프로젝트 `bible-memo-assistant` 생성
 - Cloud Firestore `(default)` 데이터베이스 생성
 - 위치: `asia-northeast3 (Seoul)`
 - 프로덕션 모드로 생성
-- 아직 실제 업무 컬렉션은 생성하지 않음
+- Firebase 서비스 계정 키는 개인 PC의 `backend/firebase-service-account.json`에 저장
 - `backend/config.py` 생성
   - `backend/.env` 로드
   - Firebase / CORS / AI 환경변수 중앙 관리
-  - 여러 Origin을 쉼표로 받을 수 있도록 구성
 - `backend/firebase_client.py` 생성
   - Firebase Admin SDK lazy initialization
-  - 공개 API `firebase_admin.get_app()`을 사용해 중복 초기화 방지
-  - 로컬 서비스 계정 JSON 파일 경로 지원
-  - 배포용 서비스 계정 JSON 문자열 지원
-  - 누락/잘못된 설정에 명확한 오류 메시지 제공
+  - 공개 API `firebase_admin.get_app()`으로 중복 초기화 방지
+  - 로컬 JSON 파일 경로와 배포용 JSON 문자열 모두 지원
+- `scripts/setup_local_firebase_env.py` 생성
+  - 비밀 파일 Git 제외 여부를 먼저 확인한 뒤 로컬 `.env`를 안전하게 준비
 - `scripts/check_firebase.py` 생성
-  - 실제 연결 후 컬렉션 목록만 읽는 읽기 전용 연결 점검 스크립트
-- Firebase 관련 Python 파일 정적 문법 검사 완료
+  - 실제 Firestore 컬렉션 목록을 읽기 전용으로 확인
+- 남은 검증: 개인 PC에서 `LOCAL_FIREBASE_ENV_OK`, `FIREBASE_CONNECTION_OK` 확인
+
+### 5단계 data API — 구현 완료, 실제 Firestore 통합 테스트 필요
+
+- `backend/models.py`에 data 요청 모델 구현
+- `backend/routers/data.py` 구현
+  - POST `/api/data`
+  - GET `/api/data`
+  - PUT `/api/data/{item_id}`
+  - DELETE `/api/data/{item_id}`
+  - GET `/api/data/summary`
+- `backend/services/summary.py` 구현
+  - 데이터 수
+  - 총 value
+  - 평균 value
+  - 첫 날짜 / 마지막 날짜
+- Firestore 연결 실패 시 비밀정보를 노출하지 않는 503 응답 구조 적용
+
+### 6단계 conversations API — 구현 완료, 실제 Firestore 통합 테스트 필요
+
+- POST `/api/conversations`
+- GET `/api/conversations`
+- GET `/api/conversations/{conversation_id}`
+- DELETE `/api/conversations/{conversation_id}`
+- user / assistant 역할만 저장 가능하도록 제한
+- 최근 수정 순으로 대화 목록 반환
+
+### 7단계 AI chat — 구현 완료, 실제 Provider 검증 필요
+
+- `backend/services/openai_client.py` 구현
+  - OpenAI-compatible Provider 구조
+  - `OPENAI_BASE_URL` 선택 적용
+  - 모델명을 코드에 하드코딩하지 않음
+  - 실제 `OPENAI_MODEL` 환경변수만 사용
+  - 출력 토큰 제한
+  - 제한된 재시도와 로그
+  - JSON 응답 강제 요청
+  - ```json 코드 펜스 제거
+  - thought / thinking / reasoning / analysis 필드 제거
+- `scripts/list_ai_models.py` 구현
+  - 실제 Provider의 모델 목록을 먼저 조회
+- POST `/api/chat` 구현
+  - Firestore data 요약 조회
+  - 요약을 시스템 프롬프트에 주입
+  - AI 응답 생성
+  - conversations에 사용자/AI 메시지 저장
+- 남은 검증
+  - 교육기관 API 사용 허용 여부 확인
+  - 실제 `/v1/models` 결과 확인
+  - 실제 존재하는 모델명을 `OPENAI_MODEL`에 설정
+  - JSON mode 및 `max_tokens` 호환성 실제 테스트
+
+### 8단계 Render 배포 — 미진행
+
+- 실제 외부 공개 배포는 승인 게이트로 남겨둠
+- Firebase/AI 실제 연결 검증 후 진행
+
+### 9단계 Vanilla Frontend — 구현 완료, 브라우저 통합 테스트 필요
+
+- `frontend/index.html`
+- `frontend/style.css`
+- `frontend/app.js`
+- React/Vue 없이 HTML/CSS/JavaScript만 사용
+- 구현 기능
+  - Backend API 주소 저장
+  - 데이터 요약 카드
+  - data 추가/목록/수정/삭제
+  - 삭제 전 사용자 재확인
+  - AI 채팅 및 로딩 상태
+  - 새 대화
+  - 이전 대화 목록/불러오기/삭제
+  - 모바일 반응형 레이아웃
+- 사용자 데이터를 DOM에 넣을 때 `textContent`를 사용해 단순 HTML 삽입을 피함
+- 남은 검증: 실제 FastAPI와 브라우저 연결 후 전체 흐름 확인
+
+### 10단계 Vercel 배포 — 미진행
+
+- Frontend 로컬 통합 테스트 이후 공개 배포 예정
+
+### 11단계 README / 캡처 / 제출 — 일부만 준비
+
+- `docs/progress.md`로 개발 진행상황 기록 중
+- 최종 README, 캡처, 요건 체크리스트는 미완료
 
 ---
 
-## 3. 주요 커밋
+## 3. 현재 브랜치 흐름
 
-- `8a57606` chore: initialize project environment
-- `180215f` feat: add memorization schedule generator
-- `5195fea` feat: add FastAPI application skeleton
-- `d02c7ef` feat: update progress after FastAPI setup
-- `46c02ae` feat: add environment configuration module
-- `a5f1a84` feat: add lazy Firebase client
-- `9feec09` chore: update environment variable example
-- `c3041fe` feat: load CORS origins from environment
-- `b0afecc` chore: add read-only Firebase connection check
+현재 구현 흐름은 다음처럼 선형으로 이어진다.
+
+`feat/setup`
+→ `feat/api`
+→ `feat/firebase`
+→ `feat/firestore-api`
+→ `feat/ai-chat`
+→ `feat/frontend`
+
+각 뒤 브랜치는 앞 브랜치의 변경을 포함한다.
+현재 가장 많은 기능이 들어 있는 브랜치는 `feat/frontend`이다.
 
 ---
 
@@ -100,61 +173,69 @@ GitHub에 올리지 않는 항목:
 - 실제 OpenAI / 교육기관 API 키
 - 실제 Firebase 서비스 계정 JSON 내용
 
-서비스 계정 키는 코드나 채팅에 붙여넣지 않는다.
-로컬에서는 `backend/firebase-service-account.json` 파일을 사용하고, 배포 환경에서는 환경변수의 JSON 문자열 방식을 사용할 수 있다.
+원칙:
+
+- 실제 키 값은 코드, GitHub, 채팅, 캡처에 넣지 않는다.
+- 외부 삭제 작업은 프론트엔드에서도 사용자 확인 후 실행한다.
+- Firebase/AI 내부 오류 원문은 사용자 응답에 불필요하게 노출하지 않는다.
+- 실제 배포와 `main` 병합은 별도 승인 후 진행한다.
 
 ---
 
-## 5. AI API 방향
+## 5. 현재 Blocker / Major / Normal
 
-- OpenAI-compatible 구조 유지
-- 특정 AI 제공자에 종속되지 않도록 구성
-- `AI_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` 환경변수 사용 예정
-- 모델명은 추측하지 않고 실제 `/v1/models` 응답 후 선택
-- 출력 토큰 제한, 실패 재시도, 로그 기록을 기본 정책으로 적용 예정
+### Blocker
 
----
+- 없음. 비밀키는 저장소에 넣지 않는 구조로 유지 중.
 
-## 6. 데이터 전략
+### Major
 
-- 개발 단계에서는 5개 WEB 구절로 파이프라인 검증 완료
-- 최종 제출 전 최소 100개 이상의 시계열 데이터 포인트 확보
-- `make_schedule.py`는 100개 미만이면 경고하되 개발 테스트는 계속 진행
+1. 실제 로컬 Firebase 인증 연결 결과가 아직 이 문서에 기록되지 않음.
+2. data / conversations CRUD를 실제 Firestore에 쓰고 읽는 통합 테스트 미실시.
+3. AI Provider의 실제 모델 목록 및 chat 호출 미검증.
+4. Frontend ↔ FastAPI ↔ Firestore ↔ AI 전체 흐름 미검증.
 
----
+Major가 남아 있으므로 구현 코드는 많이 진행됐지만 아직 최종 완료 판정은 하지 않는다.
 
-## 7. 현재 상태와 승인 게이트
+### Normal
 
-현재 Firebase 연결 코드는 GitHub `feat/firebase`에 준비되어 있다.
-아직 실제 서비스 계정 비밀키를 저장소에 넣지 않았으며 실제 Firestore 인증 연결은 수행하지 않았다.
-
-다음 외부 변경은 사용자 승인 후 진행한다.
-
-1. Firebase 서비스 계정 비공개 키 생성
-2. 개인 PC의 `backend/firebase-service-account.json`에 저장
-3. 개인 PC의 `backend/.env` 생성
-4. `scripts/check_firebase.py`로 실제 Firestore 읽기 연결 확인
+- Render/Vercel 배포 설정
+- 100개 이상 최종 데이터 확장
+- README / 캡처 / 발표 문서
 
 ---
 
-## 8. 다음 개발 작업
+## 6. 다음에 개인 PC에서 가장 먼저 할 검증
 
-실제 Firebase 인증 연결이 확인되면 다음 순서로 진행한다.
+1. 최신 `feat/frontend` 받기
+2. `scripts/setup_local_firebase_env.py` 실행
+3. `scripts/check_firebase.py` 실행
+4. `scripts/check_api_routes.py` 실행
+5. Uvicorn 실행 후 Swagger에서 data / conversations 실제 CRUD 테스트
+6. 실제 Provider 정보가 준비되면 `scripts/list_ai_models.py` 실행
+7. 실제 존재 모델 설정 후 `/api/chat` 한 건 테스트
+8. `frontend/index.html`을 브라우저에서 열고 전체 흐름 확인
 
-1. Firestore `data` 컬렉션용 데이터 모델 확정
-2. 데이터 CRUD API 구현
-   - POST `/api/data`
-   - GET `/api/data`
-   - PUT `/api/data/{id}`
-   - DELETE `/api/data/{id}`
-   - GET `/api/data/summary`
-3. 대화 API 구현
-4. AI 채팅 및 데이터 요약 컨텍스트 연결
-5. Render 배포
-6. HTML/CSS/JavaScript 프론트엔드 구현
-7. Vercel 배포
-8. 100개 이상 데이터 확장 및 최종 검증
-9. README / 캡처 / 제출 문서 정리
+---
+
+## 7. 진행률 해석
+
+- 코드 구현량 기준: 약 70% 수준
+- 실제 검증·배포·제출까지 포함한 완성도 기준: 약 55~60% 수준
+
+구현량과 완료 판정을 구분한다. 모델이나 문서의 “완료” 주장보다 실제 실행 증거를 우선한다.
+
+---
+
+## 8. 다음 개발 순서
+
+1. 실제 Firebase 연결 및 CRUD 통합 검증
+2. AI 모델 목록 조회 및 chat 실호출 검증
+3. Frontend 전체 흐름 검증
+4. Render 배포
+5. Vercel 배포
+6. 100개 이상 시계열 데이터 확장
+7. README / 캡처 / 제출 요건 체크
 
 ---
 
@@ -163,5 +244,5 @@ GitHub에 올리지 않는 항목:
 - GitHub를 실제 상태의 기준으로 사용
 - 구현은 한 기능 단위로 진행
 - 완료는 모델의 말이 아니라 파일, diff, 실행 결과, 테스트 근거로 판단
-- 비밀키 생성, 배포 공개, `main` 병합, 삭제 등 되돌리기 어려운 작업은 사용자 승인 후 진행
-- Blocker 또는 Major 문제가 남아 있으면 다음 단계로 넘어가지 않음
+- 비밀키, 유료 결제, 공개 배포, `main` 병합, 삭제 등 되돌리기 어려운 작업은 사용자 승인 후 진행
+- Blocker 또는 Major 문제가 남아 있으면 최종 완료로 판정하지 않음
