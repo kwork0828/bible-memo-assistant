@@ -21,6 +21,7 @@ EXPECTED_ROUTES = {
     ("GET", "/api/conversations"),
     ("GET", "/api/conversations/{conversation_id}"),
     ("DELETE", "/api/conversations/{conversation_id}"),
+    ("POST", "/api/chat"),
 }
 
 
