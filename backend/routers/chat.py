@@ -95,7 +95,7 @@ def chat(payload: ChatRequest):
     except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"AI 응답을 생성하지 못했습니다: {error}",
+            detail="AI 응답을 생성하지 못했습니다. 서버의 AI 설정과 모델 호환성을 확인해주세요.",
         ) from error
 
     user_message = {"role": "user", "content": payload.message}
