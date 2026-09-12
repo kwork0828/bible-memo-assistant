@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -52,3 +52,25 @@ class DataResponse(DataBase):
     """Firestore 문서 ID를 포함한 API 응답 모델."""
 
     id: str
+
+
+class ConversationMessage(BaseModel):
+    """대화에 저장되는 한 개의 사용자/AI 메시지."""
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1)
+
+
+class ConversationCreate(BaseModel):
+    """새 대화를 만들 때 사용하는 입력 모델."""
+
+    title: str = Field(default="새 대화", min_length=1, max_length=100)
+    messages: list[ConversationMessage] = Field(default_factory=list)
+
+
+class ConversationResponse(ConversationCreate):
+    """Firestore 문서 ID와 시간 정보를 포함한 대화 응답 모델."""
+
+    id: str
+    created_at: str
+    updated_at: str
