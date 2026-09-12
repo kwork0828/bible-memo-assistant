@@ -74,3 +74,18 @@ class ConversationResponse(ConversationCreate):
     id: str
     created_at: str
     updated_at: str
+
+
+class ChatRequest(BaseModel):
+    """AI 채팅 요청."""
+
+    message: str = Field(min_length=1, max_length=4000)
+    conversation_id: str | None = None
+
+
+class ChatResponse(BaseModel):
+    """AI 채팅 응답과 저장된 대화 ID, 사용한 데이터 요약."""
+
+    conversation_id: str
+    reply: str
+    data_summary: dict[str, Any]
