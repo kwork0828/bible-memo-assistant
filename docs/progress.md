@@ -6,7 +6,7 @@
 - Terminal: Windows Terminal / PowerShell
 - Python: 집 PC 3.13.15, 노트북 3.14.7에서 필수 패키지 import 확인
 - Git / GitHub 사용 중
-- 현재 작업 브랜치: `feat/firebase`
+- 현재 작업 브랜치: `feat/data`
 - GitHub 저장소: `kwork0828/bible-memo-assistant`
 - 저장소 공개 여부: Public
 
@@ -17,7 +17,7 @@
 ### 환경 및 Git
 
 - 프로젝트 폴더 및 Git 저장소 초기화
-- `feat/setup`, `feat/api`, `feat/firebase` 브랜치 구성
+- `feat/setup`, `feat/api`, `feat/firebase`, `feat/data` 브랜치 구성
 - `.venv`, `.gitignore`, `AGENTS.md`, `docs/progress.md` 구성
 - GitHub Public 저장소 및 `origin` 연결
 - `.env`, `.venv`, Firebase 서비스 계정 키 Git 제외 규칙 확인
@@ -59,7 +59,7 @@
 - Cloud Firestore `(default)` 데이터베이스 생성
 - 위치: `asia-northeast3 (Seoul)`
 - 프로덕션 모드로 생성
-- 아직 실제 업무 컬렉션은 생성하지 않음
+- 실제 서비스 계정 키는 로컬 PC에만 저장하고 GitHub에는 올리지 않음
 - `backend/config.py` 생성
   - `backend/.env` 로드
   - Firebase / CORS / AI 환경변수 중앙 관리
@@ -70,27 +70,34 @@
   - 로컬 서비스 계정 JSON 파일 경로 지원
   - 배포용 서비스 계정 JSON 문자열 지원
   - 누락/잘못된 설정에 명확한 오류 메시지 제공
+- `scripts/setup_local_firebase_env.py` 생성
+  - Firebase 키와 `.env`의 Git 제외 여부를 먼저 확인
+  - 안전할 때만 로컬 `.env`의 Firebase 경로와 CORS 값을 설정
 - `scripts/check_firebase.py` 생성
   - 실제 연결 후 컬렉션 목록만 읽는 읽기 전용 연결 점검 스크립트
-- Firebase 관련 Python 파일 정적 문법 검사 완료
+
+### 데이터 API 코드 준비
+
+- `backend/models.py` 생성
+  - `date`, `value`, `memo` 시계열 데이터 모델 정의
+  - `date`는 `YYYY-MM-DD` 형식 검증
+  - `value`는 0 이상으로 검증
+- `backend/services/summary.py` 생성
+  - 데이터 건수, 기간, 총합, 평균, 최소/최대 요약
+- `backend/routers/data.py` 생성
+  - POST `/api/data`
+  - GET `/api/data`
+  - PUT `/api/data/{document_id}`
+  - DELETE `/api/data/{document_id}`
+  - GET `/api/data/summary`
+- `backend/main.py`에 data router 등록
+- `scripts/check_data_api_structure.py` 생성
+  - Firebase 인증 없이 필수 라우트, 데이터 모델, 요약 로직 구조 점검
+- 데이터 API 관련 Python 소스 정적 문법 검사 완료
 
 ---
 
-## 3. 주요 커밋
-
-- `8a57606` chore: initialize project environment
-- `180215f` feat: add memorization schedule generator
-- `5195fea` feat: add FastAPI application skeleton
-- `d02c7ef` feat: update progress after FastAPI setup
-- `46c02ae` feat: add environment configuration module
-- `a5f1a84` feat: add lazy Firebase client
-- `9feec09` chore: update environment variable example
-- `c3041fe` feat: load CORS origins from environment
-- `b0afecc` chore: add read-only Firebase connection check
-
----
-
-## 4. 보안 상태
+## 3. 보안 상태
 
 GitHub에 올리지 않는 항목:
 
@@ -102,6 +109,25 @@ GitHub에 올리지 않는 항목:
 
 서비스 계정 키는 코드나 채팅에 붙여넣지 않는다.
 로컬에서는 `backend/firebase-service-account.json` 파일을 사용하고, 배포 환경에서는 환경변수의 JSON 문자열 방식을 사용할 수 있다.
+
+---
+
+## 4. 현재 검증 상태
+
+완료 증거:
+
+- 일정 생성 기능은 로컬 실행 검증 완료
+- FastAPI `/`, `/health`, `/docs`는 브라우저 실행 검증 완료
+- Firebase 연결 및 data CRUD API는 코드 준비 완료
+
+아직 남은 실제 검증:
+
+1. 개인 PC에서 `scripts/setup_local_firebase_env.py` 실행
+2. `scripts/check_firebase.py`로 실제 Firestore 읽기 연결 확인
+3. `scripts/check_data_api_structure.py` 실행
+4. Swagger에서 data CRUD를 실제 Firestore에 생성/조회/수정/삭제 테스트
+
+실제 연결과 CRUD 테스트 전까지 Firebase/data API 단계는 최종 완료로 판정하지 않는다.
 
 ---
 
@@ -123,42 +149,21 @@ GitHub에 올리지 않는 항목:
 
 ---
 
-## 7. 현재 상태와 승인 게이트
+## 7. 다음 개발 작업
 
-현재 Firebase 연결 코드는 GitHub `feat/firebase`에 준비되어 있다.
-아직 실제 서비스 계정 비밀키를 저장소에 넣지 않았으며 실제 Firestore 인증 연결은 수행하지 않았다.
+실제 Firebase 연결 및 data CRUD 검증 후 다음 순서로 진행한다.
 
-다음 외부 변경은 사용자 승인 후 진행한다.
-
-1. Firebase 서비스 계정 비공개 키 생성
-2. 개인 PC의 `backend/firebase-service-account.json`에 저장
-3. 개인 PC의 `backend/.env` 생성
-4. `scripts/check_firebase.py`로 실제 Firestore 읽기 연결 확인
-
----
-
-## 8. 다음 개발 작업
-
-실제 Firebase 인증 연결이 확인되면 다음 순서로 진행한다.
-
-1. Firestore `data` 컬렉션용 데이터 모델 확정
-2. 데이터 CRUD API 구현
-   - POST `/api/data`
-   - GET `/api/data`
-   - PUT `/api/data/{id}`
-   - DELETE `/api/data/{id}`
-   - GET `/api/data/summary`
-3. 대화 API 구현
-4. AI 채팅 및 데이터 요약 컨텍스트 연결
-5. Render 배포
-6. HTML/CSS/JavaScript 프론트엔드 구현
-7. Vercel 배포
-8. 100개 이상 데이터 확장 및 최종 검증
-9. README / 캡처 / 제출 문서 정리
+1. 대화 API 구현
+2. AI 채팅 및 데이터 요약 컨텍스트 연결
+3. Render 배포
+4. HTML/CSS/JavaScript 프론트엔드 구현
+5. Vercel 배포
+6. 100개 이상 데이터 확장 및 최종 검증
+7. README / 캡처 / 제출 문서 정리
 
 ---
 
-## 9. AI 작업 방식
+## 8. AI 작업 방식
 
 - GitHub를 실제 상태의 기준으로 사용
 - 구현은 한 기능 단위로 진행
