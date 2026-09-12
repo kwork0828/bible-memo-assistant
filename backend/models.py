@@ -55,3 +55,10 @@ class ConversationCreate(BaseModel):
 
     title: str = Field(default="새 대화", min_length=1, max_length=120)
     messages: list[ChatMessage] = Field(default_factory=list)
+
+
+class ChatRequest(BaseModel):
+    """AI 채팅 요청 형식."""
+
+    message: str = Field(min_length=1, max_length=4000)
+    conversation_id: str | None = None
