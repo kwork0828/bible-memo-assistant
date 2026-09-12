@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import ALLOWED_ORIGINS
+from backend.routers.conversations import router as conversations_router
 from backend.routers.data import router as data_router
 
 
@@ -20,6 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(data_router)
+app.include_router(conversations_router)
 
 
 @app.get("/")
