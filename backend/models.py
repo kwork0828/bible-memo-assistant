@@ -44,9 +44,9 @@ class DataUpdate(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    """대화 한 줄의 역할과 내용을 표현한다."""
+    """저장되는 대화 한 줄의 역할과 내용을 표현한다."""
 
-    role: Literal["user", "assistant", "system"]
+    role: Literal["user", "assistant"]
     content: str = Field(min_length=1)
 
 
