@@ -7,6 +7,7 @@
     <title>VerseMate · 영어성경 암송 AI 비서</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="library.css">
+    <link rel="stylesheet" href="routine.css">
 </head>
 <body>
     <div class="app-shell">
@@ -16,11 +17,12 @@
                 <span><strong>VerseMate</strong><small>말씀을 마음에</small></span>
             </a>
             <nav class="nav-list" aria-label="주요 메뉴">
-                <button class="nav-item active" data-view="home"><span>01</span>오늘 학습</button>
-                <button class="nav-item" data-view="schedule"><span>02</span>복습 일정</button>
-                <button class="nav-item" data-view="library"><span>03</span>영어성경</button>
-                <button class="nav-item" data-view="coach"><span>04</span>AI 코치</button>
-                <button class="nav-item" data-view="records"><span>05</span>내 기록</button>
+                <button class="nav-item active" data-view="home"><span>D</span>오늘 학습</button>
+                <button class="nav-item" data-view="schedule"><span>R</span>복습 일정</button>
+                <button class="nav-item" data-view="library"><span>L</span>영어성경</button>
+                <button class="nav-item" data-view="bod"><span>P</span>말씀 루틴</button>
+                <button class="nav-item" data-view="coach"><span>C</span>AI 코치</button>
+                <button class="nav-item" data-view="records"><span>J</span>내 기록</button>
             </nav>
             <div class="sidebar-card">
                 <p class="eyebrow">이번 주 목표</p>
@@ -70,20 +72,39 @@
                             <span class="pill" id="verseStage">D+3 복습</span>
                         </div>
                         <p class="verse" id="verseText">“I can do all things through Christ, who strengthens me.”</p>
+                        <p class="quiz-text" id="quizText" hidden aria-label="몇 단어가 빈칸으로 표시된 퀴즈 본문"></p>
                         <p class="translation" id="verseTranslation">내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라.</p>
+                        <div class="audio-toolbar" aria-label="영어 본문 듣기 설정">
+                            <button class="secondary-button" id="playVerse" type="button">▶ 영어 듣기</button>
+                            <label>속도
+                                <select id="speechRate">
+                                    <option value="0.75">0.75× 천천히</option>
+                                    <option value="1" selected>1× 보통</option>
+                                    <option value="1.25">1.25× 빠르게</option>
+                                </select>
+                            </label>
+                            <label class="caption-toggle"><input id="captionToggle" type="checkbox" checked> 자막 표시</label>
+                            <span class="speech-status" id="speechStatus">재생 대기</span>
+                        </div>
+                        <p class="speech-caption" id="speechCaption" aria-live="polite"></p>
                         <div class="recall-area">
                             <label for="recallInput">보지 않고 영어로 적어보세요</label>
                             <textarea id="recallInput" rows="3" placeholder="I can do all things..."></textarea>
                             <p id="recallFeedback" class="feedback" aria-live="polite"></p>
+                            <div class="recall-review" id="recallReview" hidden>
+                                <div><strong>내가 적은 답</strong><p id="recallReviewText"></p></div>
+                                <button class="ghost-button" id="editRecall" type="button">답 수정하기</button>
+                            </div>
                         </div>
                         <div class="practice-actions">
                             <button class="ghost-button" id="toggleVerse">본문 가리기</button>
+                            <button class="ghost-button" id="quizMode" type="button">QUIZ 모드</button>
                             <button class="secondary-button" id="checkRecall">답 확인</button>
                             <button class="primary-button" id="completeVerse">암송 완료</button>
                         </div>
                         <div class="verse-pagination">
                             <button id="prevVerse" aria-label="이전 구절">←</button>
-                            <span><b id="verseNumber">1</b> / 4</span>
+                            <span><b id="verseNumber">1</b> / <b id="verseTotal">4</b></span>
                             <button id="nextVerse" aria-label="다음 구절">→</button>
                         </div>
                     </article>
@@ -116,6 +137,16 @@
                         <div class="queue-item"><span class="queue-state new">신규</span><p><strong>Romans 8:28</strong><small>31단어 · D+0</small></p><span>오후</span></div>
                         <div class="queue-item"><span class="queue-state review">복습</span><p><strong>John 3:16</strong><small>25단어 · D+30</small></p><span>저녁</span></div>
                     </div>
+                </article>
+
+                <article class="panel routine-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">5-MINUTE ROUTINE</p><h3>오늘의 5분 루틴</h3><p>짧게 끝내도 충분합니다. 더 깊이 묵상하고 싶을 때만 다음 질문으로 이어가세요.</p></div><span class="routine-time">약 5분</span></div>
+                    <div class="routine-steps">
+                        <div class="routine-step"><span>1</span><div><strong>읽기 · 1분</strong><small>영어 본문을 천천히 소리 내어 읽기</small></div></div>
+                        <div class="routine-step"><span>2</span><div><strong>암송 · 2분</strong><small>본문을 가리고 기억나는 만큼 말하기</small></div></div>
+                        <div class="routine-step"><span>3</span><div><strong>적용 · 2분</strong><small>오늘 실천할 한 가지를 정하고 기록하기</small></div></div>
+                    </div>
+                    <div class="routine-footer"><span>암송 완료 후 하나님·기도·적용 회고가 열립니다.</span><button class="text-button" data-go="coach">깊이 묵상하기 →</button></div>
                 </article>
             </section>
 
@@ -171,6 +202,94 @@
                 </article>
             </section>
 
+            <section id="bod" class="view">
+                <div class="bod-hero">
+                    <div>
+                        <p class="eyebrow light">WORD · PLAN · PRACTICE</p>
+                        <h2>말씀을 오늘의 한 행동으로</h2>
+                        <p>감상에서 멈추지 않고, 하나님 앞에서 성찰하고 계획한 뒤 실제 삶에서 실행합니다.</p>
+                    </div>
+                    <div class="bod-flow" aria-label="말씀 실천 루틴 네 단계">
+                        <span><b>1</b>성찰</span><i>→</i><span><b>2</b>계획</span><i>→</i><span><b>3</b>실행</span><i>→</i><span><b>4</b>회고</span>
+                    </div>
+                </div>
+
+                <div class="bod-layout">
+                    <form class="panel bod-form" id="bodForm">
+                        <div class="panel-heading">
+                            <div><p class="eyebrow">TODAY'S APPLICATION</p><h2>오늘의 말씀 적용</h2><p>말씀을 성찰하고, 오늘의 한 행동으로 옮깁니다.</p></div>
+                            <span class="storage-badge">목업 · 이 브라우저에 임시 저장</span>
+                        </div>
+
+                        <label class="bod-reference">적용할 말씀
+                            <input id="bodReference" name="reference" value="Genesis 39:9–12" required>
+                        </label>
+
+                        <fieldset class="bod-stage being-stage">
+                            <legend><span>B</span><div><strong>Being · 하나님 앞에서 성찰</strong><small>말씀으로 오늘의 마음과 태도를 비춰봅니다.</small></div></legend>
+                            <label>이 말씀에서 하나님은 어떤 분으로 나타나나요?
+                                <textarea name="god_reflection" rows="2" placeholder="예: 보이지 않는 자리에서도 나와 함께하시는 분"></textarea>
+                            </label>
+                            <label>오늘 하나님 앞에서 바로잡고 싶은 마음이나 태도는 무엇인가요?
+                                <textarea name="heart_check" rows="2" placeholder="예: 사람의 평가 때문에 대충하려는 마음"></textarea>
+                            </label>
+                        </fieldset>
+
+                        <fieldset class="bod-stage organizing-stage">
+                            <legend><span>O</span><div><strong>Organizing · 순종을 구체적으로 계획</strong><small>누구에게, 언제, 무엇을 할지 한 문장으로 정합니다.</small></div></legend>
+                            <label>오늘 실천할 한 가지
+                                <textarea name="today_action" rows="2" required placeholder="예: 오후 보고서를 제출하기 전 수치를 한 번 더 확인한다"></textarea>
+                            </label>
+                            <div class="form-pair">
+                                <label>실행 시간<input name="action_time" type="time" value="14:00"></label>
+                                <label>실행 장소<input name="action_place" placeholder="예: 회사 자리"></label>
+                            </div>
+                            <label>타협하지 않을 기준
+                                <input name="integrity_boundary" placeholder="예: 불리해도 숫자를 바꾸지 않는다">
+                            </label>
+                        </fieldset>
+
+                        <fieldset class="bod-stage doing-stage">
+                            <legend><span>D</span><div><strong>Doing · 유혹 앞에서 즉시 행동</strong><small>의지보다 먼저 빠져나갈 길을 준비합니다.</small></div></legend>
+                            <div class="form-pair">
+                                <label>위험 신호<input name="temptation_trigger" placeholder="예: 혼자 늦게까지 휴대폰을 볼 때"></label>
+                                <label>즉시 떠날 행동<input name="escape_action" placeholder="예: 화면을 끄고 거실로 이동"></label>
+                            </div>
+                            <label>도움을 요청할 사람 또는 대체 행동
+                                <input name="support_action" placeholder="예: 배우자에게 알리고 5분 산책하기">
+                            </label>
+                            <p class="safety-note"><strong>요셉의 원칙:</strong> 유혹과 협상하지 않고, 경계선을 넘기 전에 그 자리에서 떠납니다. 앱은 완전한 승리를 보장하지 않으며 실제 행동을 돕는 도구입니다.</p>
+                        </fieldset>
+
+                        <div class="bod-submit">
+                            <button class="ghost-button" id="fillJosephPlan" type="button">요셉 적용 예시 채우기</button>
+                            <button class="primary-button" type="submit">오늘의 적용 계획 저장</button>
+                        </div>
+                    </form>
+
+                    <aside class="bod-side">
+                        <article class="panel joseph-card">
+                            <p class="eyebrow">GENESIS 39 MODE</p>
+                            <h3>요셉처럼 하나님 앞에서</h3>
+                            <blockquote>“How then can I do this great wickedness, and sin against God?”</blockquote>
+                            <ol>
+                                <li><b>임재</b><span>하나님이 지금도 함께하심을 기억하기</span></li>
+                                <li><b>정직</b><span>사람이 보지 않아도 맡은 일을 충실히 하기</span></li>
+                                <li><b>경계</b><span>불의와 타협할 선을 미리 정하기</span></li>
+                                <li><b>피하기</b><span>반복되는 유혹의 자리에서 즉시 떠나기</span></li>
+                            </ol>
+                        </article>
+                        <article class="panel presence-card">
+                            <p class="eyebrow">TODAY'S ANCHOR</p>
+                            <h3>“내가 여호와를 항상 내 앞에 모심이여”</h3>
+                            <p>이 문구의 직접 출처는 시편 16:8이며, 창세기 39장의 요셉은 그 태도를 삶으로 보여주는 적용 사례로 연결합니다.</p>
+                            <button class="secondary-button" type="button" id="startPresencePause">1분 임재 멈춤 시작</button>
+                            <strong class="pause-timer" id="pauseTimer">01:00</strong>
+                        </article>
+                    </aside>
+                </div>
+            </section>
+
             <section id="coach" class="view">
                 <div class="chat-layout">
                     <article class="panel chat-panel">
@@ -191,7 +310,20 @@
                     <article class="panel record-highlight"><p class="eyebrow">평균 정확도</p><strong>86%</strong><span>최근 30일</span><small>지난달보다 +4%</small></article>
                     <article class="panel record-highlight"><p class="eyebrow">총 학습 시간</p><strong>9.4h</strong><span>누적 시간</span><small>하루 평균 18분</small></article>
                 </div>
+                <div class="insight-grid">
+                    <article class="panel insight-card weekly-insight"><div class="insight-label"><span>이번 주</span><b>WEEKLY INSIGHT</b></div><h3>짧은 리듬이 잘 맞고 있어요</h3><p>이번 주 5일 학습했습니다. 같은 시간에 5분씩 이어간 것이 꾸준함으로 연결됐습니다.</p><small>기록 5일 · 118단어 · 평균 24단어</small></article>
+                    <article class="panel insight-card monthly-insight"><div class="insight-label"><span>이번 달</span><b>MONTHLY INSIGHT</b></div><h3>복습일의 정확도가 높습니다</h3><p>신규 구절보다 복습 구절에서 정확도가 8% 높아요. 다음 달에는 취약 구절을 한 번 더 복습해 보세요.</p><small>기록 18일 · 642단어 · 평균 36단어</small></article>
+                </div>
                 <article class="panel page-panel"><div class="panel-heading"><div><p class="eyebrow">최근 기록</p><h2>학습 이력</h2></div><input class="search" placeholder="구절 검색"></div><div class="history-table"><div class="table-head"><span>날짜</span><span>구절</span><span>단계</span><span>정확도</span></div><div><span>09.17</span><strong>Philippians 4:13</strong><span>D+3</span><span>92%</span></div><div><span>09.16</span><strong>Psalm 119:105</strong><span>D+3</span><span>78%</span></div><div><span>09.15</span><strong>John 3:16</strong><span>D+14</span><span>89%</span></div></div></article>
+                <article class="panel journal-panel">
+                    <div class="panel-heading">
+                        <div><p class="eyebrow">REFLECTION & PRACTICE</p><h2>묵상·감상노트</h2><p>말씀에서 시작한 생각과 실제 적용 결과를 함께 모아봅니다.</p></div>
+                        <div class="journal-tools"><span class="storage-badge">목업 · 임시 저장</span><input class="search" id="journalSearch" type="search" placeholder="말씀·묵상·행동 검색"></div>
+                    </div>
+                    <div class="journal-list" id="journalList"></div>
+                    <div class="empty-state" id="journalEmpty" hidden><strong>아직 저장한 묵상이 없습니다.</strong><span>말씀 BOD에서 오늘의 첫 적용을 기록해 보세요.</span></div>
+                </article>
+                <article class="panel consistency-panel"><div class="panel-heading"><div><p class="eyebrow">CONSISTENCY</p><h2>꾸준함의 흔적</h2><p>작은 초록 칸 하나가 하루의 실천을 기록합니다.</p></div><strong class="consistency-total">34일 학습</strong></div><div class="heatmap-wrap"><div class="heatmap-months"><span>6월</span><span>7월</span><span>8월</span><span>9월</span></div><div class="heatmap" id="heatmap" aria-label="최근 12주 학습 기록"></div><div class="heatmap-legend"><span>적음</span><i class="level-0"></i><i class="level-1"></i><i class="level-2"></i><i class="level-3"></i><i class="level-4"></i><span>많음</span></div></div></article>
             </section>
         </main>
     </div>
@@ -204,6 +336,29 @@
             <label>학습 시작일<input name="date" type="date" required></label>
             <p class="dialog-note">저장하면 D+0, 1, 3, 7, 14, 30 일정이 자동 생성됩니다.</p>
             <div class="dialog-actions"><button value="cancel" class="ghost-button">취소</button><button value="default" class="primary-button" id="saveVerse">일정 만들기</button></div>
+        </form>
+    </dialog>
+    <dialog id="reflectionDialog">
+        <form method="dialog" id="reflectionForm">
+            <div class="dialog-head"><div><p class="eyebrow">AFTER MEMORIZATION</p><h2>오늘의 짧은 회고</h2></div><button value="cancel" class="close-button" aria-label="닫기">×</button></div>
+            <p class="reflection-intro">모든 답을 길게 쓰지 않아도 괜찮습니다. 한 문장 또는 단어 하나면 충분합니다.</p>
+            <label>오늘 말씀에 대한 한 줄 평<input name="quick_note" maxlength="120" placeholder="예: 하나님 앞에서 정직하게 일하자"></label>
+            <div class="depth-prompt"><strong>더 깊은 적용은 말씀 실천 루틴에서</strong><span>지금은 한 줄만 남기고, 구체적인 행동 계획은 별도 화면에서 천천히 작성합니다.</span></div>
+            <div class="dialog-actions"><button value="cancel" class="ghost-button">나중에</button><button value="cancel" class="secondary-button" data-go="bod">말씀 루틴 열기</button><button value="default" class="primary-button" id="saveReflection">한 줄 평 저장</button></div>
+        </form>
+    </dialog>
+    <dialog id="shareDialog">
+        <form method="dialog" id="shareForm">
+            <div class="dialog-head"><div><p class="eyebrow">SHARE DRAFT</p><h2>나눔 글 초안</h2></div><button value="cancel" class="close-button" aria-label="닫기">×</button></div>
+            <p class="reflection-intro">외부에 자동 게시하지 않습니다. 가족·직장·상담 정보가 없는지 직접 확인한 뒤 복사하세요.</p>
+            <div class="share-formats" role="group" aria-label="글 형식 선택">
+                <button class="active" type="button" data-share-format="blog">블로그</button>
+                <button type="button" data-share-format="threads">Threads</button>
+                <button type="button" data-share-format="short">짧은 SNS</button>
+            </div>
+            <textarea id="shareDraft" rows="12" aria-label="생성된 나눔 글 초안"></textarea>
+            <label class="privacy-check"><input id="privacyChecked" type="checkbox"> 개인·가족·직장 정보가 없는지 확인했습니다.</label>
+            <div class="dialog-actions"><button value="cancel" class="ghost-button">닫기</button><button class="primary-button" id="copyShareDraft" type="button" disabled>검토 후 복사</button></div>
         </form>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

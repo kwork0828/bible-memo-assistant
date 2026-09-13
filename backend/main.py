@@ -5,6 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
+from backend.routers.data import router as data_router
+from backend.routers.conversations import router as conversations_router
+
 
 DEFAULT_ALLOWED_ORIGINS = [
     "http://localhost:5500",
@@ -41,6 +44,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(data_router)
+app.include_router(conversations_router)
 
 
 @app.get("/")
