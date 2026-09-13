@@ -118,9 +118,10 @@
 2. 실행 중 프로그램 또는 서버 Ctrl+C 종료
 3. `git status` 확인
 4. `.env`, `.venv`, Firebase 키가 목록에 없는지 확인
-5. `git add .`
-6. `git commit -m "..."`
-7. `git push`
+5. `python -m unittest discover -s . -p "test_*.py"` 실행 후 실제 테스트 통과 건수 확인 (`Ran 0 tests`는 통과 아님)
+6. `git add .`
+7. `git commit -m "..."`
+8. `git push`
 
 ---
 

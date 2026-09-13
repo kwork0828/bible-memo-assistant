@@ -124,11 +124,13 @@ main 브랜치에는 직접 개발하지 않는다.
 2. 실행 중인 Python 프로그램이나 서버가 있다면 Ctrl+C로 종료
 3. git status 실행
 4. .env, .venv, Firebase 서비스 계정 키가 Git 목록에 없는지 확인
-5. git add .
-6. git commit -m "..."
-7. git push
+5. `python -m unittest discover -s . -p "test_*.py"` 실행 후 실제 테스트 통과 건수 확인
+6. git add .
+7. git commit -m "..."
+8. git push
 
-특히 git status 보안 검사를 생략하지 않는다.
+특히 git status 보안 검사와 테스트 실행 건수 확인을 생략하지 않는다.
+`Ran 0 tests`는 통과로 판정하지 않는다.
 
 커밋 메시지 접두어는 다음을 사용한다.
 
