@@ -5,10 +5,10 @@
 - OS: Windows 11
 - Terminal: Windows Terminal
 - PowerShell: 7.6.6
-- Python: 3.13.15
+- 현재 가상환경 Python: 3.14.7
 - Git: 설치 및 사용 중
 - GitHub CLI: 설치 및 로그인 완료
-- 현재 로컬 작업 브랜치: feat/api
+- 현재 로컬 작업 브랜치: feat/firebase
 - GitHub 저장소: kwork0828/bible-memo-assistant
 - 저장소 공개 여부: Public
 
@@ -22,6 +22,7 @@
 - Git 저장소 초기화
 - feat/setup 브랜치 생성
 - feat/api 브랜치 생성
+- feat/firebase 브랜치 생성
 - Python 가상환경 `.venv` 생성
 - `.gitignore` 작성
 - `AGENTS.md` 작성
@@ -39,7 +40,7 @@
   - firebase-admin
   - openai
   - python-dotenv
-- Python 3.13.15에서 필수 패키지 import 성공
+- 현재 가상환경 Python 3.14.7에서 필수 패키지 import 성공
 - `backend/requirements.txt` 생성
 - `backend/.env.example` 생성
 
@@ -72,6 +73,22 @@
 - `/openapi.json` 정상 응답 확인
 - 로컬 Uvicorn 실행 성공
 - 브라우저에서 `/`, `/health`, `/docs` 모두 정상 확인
+
+### Firebase 클라이언트 준비
+
+- `backend/firebase_client.py` 생성
+- Render에서는 `FIREBASE_SERVICE_ACCOUNT_JSON` 환경변수에서 서비스 계정 정보 로드
+- 로컬에서는 `FIREBASE_SERVICE_ACCOUNT_FILE`에 지정한 Git 제외 키 파일 사용
+- `backend/.env`에 비밀값 대신 로컬 키 파일명만 설정
+- 서비스 계정 JSON 형식과 필수 항목 검증
+- 기본 Firebase 앱 중복 초기화 방지
+- Firestore 클라이언트 반환 함수 구현
+- 비밀값을 오류 메시지에 출력하지 않도록 예외 처리
+- 외부 Firebase 접속 없이 단위 테스트 12개 통과
+- Codex 실행 세션에서 일회성 환경변수 주입으로 Firebase 인증과
+  Firestore `data` 컬렉션 읽기 성공을 관찰함(당시 문서 0개)
+- 2026-09-13에 Git에서 제외된 `backend/firebase-service-account.json`을
+  일회성 환경변수로 주입해 실제 연결을 재검증함(문서 0개)
 
 ---
 
@@ -134,30 +151,29 @@
 ## 7. 현재 브랜치 상태
 
 - 이전 작업 브랜치: `feat/setup`
-- 현재 작업 브랜치: `feat/api`
-- `feat/api`는 일정 생성 완료 커밋에서 분기
+- 이전 API 작업 브랜치: `feat/api`
+- 현재 작업 브랜치: `feat/firebase`
+- `feat/firebase`는 FastAPI 기본 서버 작업 완료 커밋에서 분기
 - FastAPI 기본 서버 커밋 `5195fea`가 `origin/feat/api`에 push 완료
+- Firebase 클라이언트 변경사항은 `feat/firebase` 브랜치에서 작업
 
 ---
 
 ## 8. 다음 작업
 
-1. Firebase 프로젝트 및 Firestore 준비
-2. `backend/firebase_client.py` 설계
-3. Firebase 서비스 계정 키를 안전하게 환경변수로 연결
-4. Firestore `data` 컬렉션 연결 검증
-5. 데이터 API 구현
+1. 데이터 API 구현
    - POST /api/data
+     - `get_firestore_client()`를 실제로 호출하는 첫 라우트가 된다.
    - GET /api/data
    - PUT /api/data/{id}
    - DELETE /api/data/{id}
    - GET /api/data/summary
-6. 대화 API 구현
-7. AI 채팅 및 데이터 요약 컨텍스트 연결
-8. Render 배포
-9. HTML/CSS/JavaScript 프론트엔드 구현
-10. Vercel 배포
-11. README 및 제출 캡처 정리
+2. 대화 API 구현
+3. AI 채팅 및 데이터 요약 컨텍스트 연결
+4. Render 배포
+5. HTML/CSS/JavaScript 프론트엔드 구현
+6. Vercel 배포
+7. README 및 제출 캡처 정리
 
 ---
 
@@ -173,4 +189,5 @@ Codex에서 이어서 작업할 때는 다음 순서로 진행한다.
 6. 테스트 결과와 수정 파일을 보고
 7. GitHub push는 사용자의 로컬 환경에서 최종 확인 후 수행
 
-현재 다음 개발 단계는 Firebase Firestore 연결 준비이다.
+Firebase 클라이언트 코드, 단위 테스트, 실제 Firestore 읽기 검증이 완료되었다.
+다음 개발 단계는 Firestore `data` 컬렉션을 사용하는 데이터 API 구현이다.

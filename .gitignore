@@ -4,3 +4,4 @@ __pycache__/
 .env
 backend/firebase-service-account.json
 .DS_Store
+.codex-global-agents-staged.md
