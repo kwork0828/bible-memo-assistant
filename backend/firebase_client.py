@@ -20,7 +20,6 @@ REQUIRED_SERVICE_ACCOUNT_FIELDS = {
     "token_uri",
 }
 
-# 로컬에서는 backend/.env를 읽고, Render에서는 이미 설정된 환경변수를 유지한다.
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=False)
 
 
@@ -29,7 +28,7 @@ class FirebaseConfigurationError(RuntimeError):
 
 
 def _parse_service_account_json(raw_value: str) -> dict[str, Any]:
-    """환경변수의 서비스 계정 JSON을 읽고 필수 항목을 검사한다."""
+    """서비스 계정 JSON을 읽고 필수 항목을 검사한다."""
     try:
         service_account = json.loads(raw_value)
     except json.JSONDecodeError as error:
@@ -60,7 +59,7 @@ def _parse_service_account_json(raw_value: str) -> dict[str, Any]:
 
 
 def _load_service_account() -> dict[str, Any]:
-    """환경변수의 JSON 또는 로컬 키 파일에서 서비스 계정 정보를 읽는다."""
+    """환경변수 JSON 또는 로컬 키 파일에서 서비스 계정 정보를 읽는다."""
     raw_service_account = os.getenv(FIREBASE_SERVICE_ACCOUNT_ENV, "").strip()
     if raw_service_account:
         return _parse_service_account_json(raw_service_account)
@@ -93,10 +92,8 @@ def initialize_firebase_app() -> firebase_admin.App:
     except ValueError:
         pass
 
-    service_account = _load_service_account()
-
     try:
-        credential = credentials.Certificate(service_account)
+        credential = credentials.Certificate(_load_service_account())
     except (KeyError, ValueError) as error:
         raise FirebaseConfigurationError(
             "Firebase 서비스 계정 JSON의 인증서 정보가 올바르지 않습니다."
@@ -110,13 +107,9 @@ def initialize_firebase_app() -> firebase_admin.App:
                 return firebase_admin.get_app()
             except ValueError:
                 pass
-
-        raise FirebaseConfigurationError(
-            "Firebase 앱을 초기화하지 못했습니다."
-        ) from error
+        raise FirebaseConfigurationError("Firebase 앱을 초기화하지 못했습니다.") from error
 
 
 def get_firestore_client():
     """초기화된 Firebase 앱에 연결된 Firestore 클라이언트를 반환한다."""
-    app = initialize_firebase_app()
-    return firestore.client(app=app)
+    return firestore.client(app=initialize_firebase_app())

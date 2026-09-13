@@ -28,7 +28,6 @@ def get_allowed_origins() -> list[str]:
 
 allowed_origins = get_allowed_origins()
 
-
 app = FastAPI(
     title="Bible Memo Assistant API",
     version="0.1.0",
