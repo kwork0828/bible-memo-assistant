@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="영어성경 암송 일정과 복습을 돕는 AI 학습 비서 목업">
+    <title>VerseMate · 영어성경 암송 AI 비서</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="library.css">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="#" aria-label="VerseMate 홈">
+                <span class="brand-mark">VM</span>
+                <span><strong>VerseMate</strong><small>말씀을 마음에</small></span>
+            </a>
+            <nav class="nav-list" aria-label="주요 메뉴">
+                <button class="nav-item active" data-view="home"><span>01</span>오늘 학습</button>
+                <button class="nav-item" data-view="schedule"><span>02</span>복습 일정</button>
+                <button class="nav-item" data-view="library"><span>03</span>영어성경</button>
+                <button class="nav-item" data-view="coach"><span>04</span>AI 코치</button>
+                <button class="nav-item" data-view="records"><span>05</span>내 기록</button>
+            </nav>
+            <div class="sidebar-card">
+                <p class="eyebrow">이번 주 목표</p>
+                <strong>5일 중 4일 학습</strong>
+                <div class="mini-progress"><span style="width:80%"></span></div>
+                <small>한 걸음만 더 가면 목표 달성</small>
+            </div>
+            <div class="profile">
+                <span class="avatar">JW</span>
+                <span><strong>정우님</strong><small>연속 12일 학습</small></span>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow" id="todayDate"></p>
+                    <h1 id="pageTitle">오늘도 말씀 한 구절</h1>
+                </div>
+                <div class="top-actions">
+                    <button class="icon-button" aria-label="알림">●<span class="notification-dot"></span></button>
+                    <button class="primary-button" id="openAddButton">+ 일정 추가</button>
+                </div>
+            </header>
+
+            <section id="home" class="view active-view">
+                <div class="hero-grid">
+                    <article class="welcome-card">
+                        <div>
+                            <p class="eyebrow light">TODAY'S JOURNEY</p>
+                            <h2>짧게, 자주,<br>마음에 오래.</h2>
+                            <p>오늘은 신규 1절과 복습 3절이 기다리고 있어요.</p>
+                        </div>
+                        <div class="hero-ring" aria-label="오늘 학습 75퍼센트 완료"><strong id="heroPercent">75%</strong><small>오늘 완료</small></div>
+                    </article>
+                    <article class="stats-card">
+                        <div><span class="stat-icon">A</span><p>오늘 학습량<strong>62단어</strong></p></div>
+                        <div><span class="stat-icon">D</span><p>연속 학습<strong>12일</strong></p></div>
+                        <div><span class="stat-icon">R</span><p>이번 주 복습<strong>18회</strong></p></div>
+                    </article>
+                </div>
+
+                <div class="content-grid">
+                    <article class="panel practice-panel">
+                        <div class="panel-heading">
+                            <div><p class="eyebrow">지금 암송할 말씀</p><h3 id="verseRef">Philippians 4:13</h3></div>
+                            <span class="pill" id="verseStage">D+3 복습</span>
+                        </div>
+                        <p class="verse" id="verseText">“I can do all things through Christ, who strengthens me.”</p>
+                        <p class="translation" id="verseTranslation">내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라.</p>
+                        <div class="recall-area">
+                            <label for="recallInput">보지 않고 영어로 적어보세요</label>
+                            <textarea id="recallInput" rows="3" placeholder="I can do all things..."></textarea>
+                            <p id="recallFeedback" class="feedback" aria-live="polite"></p>
+                        </div>
+                        <div class="practice-actions">
+                            <button class="ghost-button" id="toggleVerse">본문 가리기</button>
+                            <button class="secondary-button" id="checkRecall">답 확인</button>
+                            <button class="primary-button" id="completeVerse">암송 완료</button>
+                        </div>
+                        <div class="verse-pagination">
+                            <button id="prevVerse" aria-label="이전 구절">←</button>
+                            <span><b id="verseNumber">1</b> / 4</span>
+                            <button id="nextVerse" aria-label="다음 구절">→</button>
+                        </div>
+                    </article>
+
+                    <aside class="right-column">
+                        <article class="panel">
+                            <div class="panel-heading"><div><p class="eyebrow">7일 학습 부담</p><h3>주간 리듬</h3></div><span class="trend">−8%</span></div>
+                            <div class="bar-chart" aria-label="요일별 학습 단어 수">
+                                <div><span style="height:42%"></span><small>월</small></div>
+                                <div><span style="height:66%"></span><small>화</small></div>
+                                <div><span style="height:52%"></span><small>수</small></div>
+                                <div><span class="today-bar" style="height:82%"></span><small>목</small></div>
+                                <div><span style="height:58%"></span><small>금</small></div>
+                                <div><span style="height:31%"></span><small>토</small></div>
+                                <div><span style="height:24%"></span><small>일</small></div>
+                            </div>
+                        </article>
+                        <article class="panel coach-preview">
+                            <div class="coach-head"><span class="ai-mark">AI</span><div><p class="eyebrow">암송 코치</p><h3>오늘의 제안</h3></div></div>
+                            <p>긴 구절보다 복습이 몰린 날입니다. 신규 학습은 1절만 유지하고, 틀린 단어를 소리 내어 세 번 읽어보세요.</p>
+                            <button class="text-button" data-go="coach">AI 코치에게 질문하기 →</button>
+                        </article>
+                    </aside>
+                </div>
+
+                <article class="panel queue-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">오늘의 학습 큐</p><h3>남은 말씀 3절</h3></div><button class="text-button" data-go="schedule">전체 일정 보기 →</button></div>
+                    <div class="queue-list" id="queueList">
+                        <div class="queue-item"><span class="queue-state review">복습</span><p><strong>Psalm 119:105</strong><small>20단어 · D+7</small></p><span>오전</span></div>
+                        <div class="queue-item"><span class="queue-state new">신규</span><p><strong>Romans 8:28</strong><small>31단어 · D+0</small></p><span>오후</span></div>
+                        <div class="queue-item"><span class="queue-state review">복습</span><p><strong>John 3:16</strong><small>25단어 · D+30</small></p><span>저녁</span></div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="schedule" class="view">
+                <article class="panel page-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">SPACED REPETITION</p><h2>복습 일정</h2><p>신규 학습 후 D+1, 3, 7, 14, 30일에 자동으로 복습합니다.</p></div><button class="primary-button" data-add>+ 구절 추가</button></div>
+                    <div class="calendar-strip">
+                        <button><small>월</small><b>14</b></button><button><small>화</small><b>15</b></button><button><small>수</small><b>16</b></button><button class="selected"><small>목</small><b>17</b></button><button><small>금</small><b>18</b></button><button><small>토</small><b>19</b></button><button><small>일</small><b>20</b></button>
+                    </div>
+                    <div class="schedule-list">
+                        <div><time>07:30</time><span class="timeline-dot"></span><p><strong>Philippians 4:13</strong><small>D+3 복습 · 12단어</small></p><span class="pill done">완료</span></div>
+                        <div><time>12:30</time><span class="timeline-dot"></span><p><strong>Psalm 119:105</strong><small>D+7 복습 · 20단어</small></p><span class="pill">예정</span></div>
+                        <div><time>18:00</time><span class="timeline-dot new-dot"></span><p><strong>Romans 8:28</strong><small>신규 학습 · 31단어</small></p><span class="pill new-pill">신규</span></div>
+                        <div><time>21:00</time><span class="timeline-dot"></span><p><strong>John 3:16</strong><small>D+30 복습 · 25단어</small></p><span class="pill">예정</span></div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="library" class="view">
+                <article class="panel library-panel">
+                    <div class="library-heading">
+                        <div>
+                            <p class="eyebrow">ENGLISH BIBLE LIBRARY</p>
+                            <h2>영어성경 보관함</h2>
+                            <p>영어 구절을 찾아 즐겨찾기하고, 암송할 본문 데이터를 직접 추가할 수 있습니다.</p>
+                        </div>
+                        <div class="library-actions">
+                            <button class="ghost-button" id="downloadSample">업로드 예시 받기</button>
+                            <button class="primary-button" id="uploadBibleButton">영어성경 업로드</button>
+                            <input id="bibleFileInput" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+                        </div>
+                    </div>
+                    <div class="library-toolbar">
+                        <label class="library-search">
+                            <span>검색</span>
+                            <input id="bibleSearch" type="search" placeholder="예: John 3:16 또는 love">
+                        </label>
+                        <div class="filter-tabs" role="group" aria-label="영어성경 필터">
+                            <button class="active" data-library-filter="all">전체 <b id="allCount">0</b></button>
+                            <button data-library-filter="favorites">즐겨찾기 <b id="favoriteCount">0</b></button>
+                            <button data-library-filter="uploaded">내가 올린 구절 <b id="uploadedCount">0</b></button>
+                        </div>
+                    </div>
+                    <div class="library-notice">
+                        <strong>현재 기본 번역: World English Bible (WEB)</strong>
+                        <span>공개 배포 가능한 영어성경을 사용합니다. 업로드 파일도 영어 본문만 허용됩니다.</span>
+                    </div>
+                    <div class="bible-list" id="bibleList"></div>
+                    <div class="empty-state" id="libraryEmpty" hidden>
+                        <strong>조건에 맞는 구절이 없습니다.</strong>
+                        <span>검색어를 바꾸거나 영어성경 파일을 추가해 보세요.</span>
+                    </div>
+                </article>
+            </section>
+
+            <section id="coach" class="view">
+                <div class="chat-layout">
+                    <article class="panel chat-panel">
+                        <div class="chat-header"><span class="ai-mark">AI</span><div><h3>VerseMate 코치</h3><small>내 암송 일정과 진도를 바탕으로 답합니다</small></div></div>
+                        <div class="messages" id="messages">
+                            <div class="message ai">안녕하세요. 오늘은 총 62단어가 예정되어 있어요. 어떤 도움을 드릴까요?</div>
+                            <div class="suggestions"><button>오늘 분량이 너무 많아</button><button>틀린 구절만 알려줘</button><button>이번 주 진도 요약해줘</button></div>
+                        </div>
+                        <form class="chat-form" id="chatForm"><input id="chatInput" placeholder="암송 일정이나 학습 방법을 물어보세요" autocomplete="off"><button class="primary-button" type="submit">전송</button></form>
+                    </article>
+                    <aside class="panel context-card"><p class="eyebrow">AI가 참고하는 정보</p><h3>내 학습 컨텍스트</h3><dl><div><dt>오늘 부담</dt><dd>62단어</dd></div><div><dt>완료율</dt><dd>75%</dd></div><div><dt>취약 구절</dt><dd>Psalm 119:105</dd></div><div><dt>연속 학습</dt><dd>12일</dd></div></dl><p class="privacy-note">대화에는 API 키나 민감한 인증정보를 넣지 마세요.</p></aside>
+                </div>
+            </section>
+
+            <section id="records" class="view">
+                <div class="record-grid">
+                    <article class="panel record-highlight"><p class="eyebrow">누적 성취</p><strong>27</strong><span>암송한 구절</span><small>이번 달 +8절</small></article>
+                    <article class="panel record-highlight"><p class="eyebrow">평균 정확도</p><strong>86%</strong><span>최근 30일</span><small>지난달보다 +4%</small></article>
+                    <article class="panel record-highlight"><p class="eyebrow">총 학습 시간</p><strong>9.4h</strong><span>누적 시간</span><small>하루 평균 18분</small></article>
+                </div>
+                <article class="panel page-panel"><div class="panel-heading"><div><p class="eyebrow">최근 기록</p><h2>학습 이력</h2></div><input class="search" placeholder="구절 검색"></div><div class="history-table"><div class="table-head"><span>날짜</span><span>구절</span><span>단계</span><span>정확도</span></div><div><span>09.17</span><strong>Philippians 4:13</strong><span>D+3</span><span>92%</span></div><div><span>09.16</span><strong>Psalm 119:105</strong><span>D+3</span><span>78%</span></div><div><span>09.15</span><strong>John 3:16</strong><span>D+14</span><span>89%</span></div></div></article>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="addDialog">
+        <form method="dialog" id="addForm">
+            <div class="dialog-head"><div><p class="eyebrow">NEW VERSE</p><h2>암송 구절 추가</h2></div><button value="cancel" class="close-button" aria-label="닫기">×</button></div>
+            <label>성경 구절<input name="reference" required placeholder="예: Isaiah 41:10"></label>
+            <label>영어 본문<textarea name="text" required rows="4" placeholder="World English Bible 본문을 입력하세요"></textarea></label>
+            <label>학습 시작일<input name="date" type="date" required></label>
+            <p class="dialog-note">저장하면 D+0, 1, 3, 7, 14, 30 일정이 자동 생성됩니다.</p>
+            <div class="dialog-actions"><button value="cancel" class="ghost-button">취소</button><button value="default" class="primary-button" id="saveVerse">일정 만들기</button></div>
+        </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+</body>
+</html>
