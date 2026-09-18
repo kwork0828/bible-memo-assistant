@@ -120,9 +120,10 @@
 
 ### 9단계 Vanilla Frontend — 구현 완료, 브라우저 통합 테스트 필요
 
-- `frontend/index.html`
+- `frontend/admin.html` (이전 `index.html`)
 - `frontend/style.css`
-- `frontend/app.js`
+- `frontend/admin.js` (이전 `app.js`)
+- `frontend/index.html`은 VerseMate 사용자 화면으로 교체됨 (`app.js`, `styles.css`, `library.css`, `routine.css`)
 - React/Vue 없이 HTML/CSS/JavaScript만 사용
 - 구현 기능
   - Backend API 주소 저장

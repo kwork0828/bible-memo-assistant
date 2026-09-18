@@ -109,7 +109,7 @@ Swagger `/docs`에서 테스트 데이터를 한 건 만들어 아래 순서로 
 
 ## 8. Frontend 확인
 
-`frontend/index.html`을 브라우저에서 확인한다.
+`frontend/index.html`(사용자 화면)과 `frontend/admin.html`(데이터 관리)을 브라우저에서 확인한다.
 
 기본 API 주소는 `http://127.0.0.1:8000`이다.
 

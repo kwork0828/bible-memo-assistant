@@ -43,9 +43,14 @@ bible-memo-assistant/
 │     ├─ summary.py
 │     └─ openai_client.py
 ├─ frontend/
-│  ├─ index.html
-│  ├─ style.css
-│  └─ app.js
+│  ├─ index.html        # VerseMate 사용자 화면
+│  ├─ app.js
+│  ├─ styles.css
+│  ├─ library.css
+│  ├─ routine.css
+│  ├─ admin.html        # API 연동 데이터 관리 화면
+│  ├─ admin.js
+│  └─ style.css         # admin 화면 전용
 ├─ scripts/
 │  ├─ make_schedule.py
 │  ├─ check_firebase.py
