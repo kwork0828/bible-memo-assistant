@@ -9,9 +9,9 @@ from pathlib import Path
 
 
 REVIEW_INTERVALS = (0, 1, 3, 7, 14, 30)
-MINIMUM_SUBMISSION_VERSES = 100
+MINIMUM_SUBMISSION_DATA_POINTS = 100
 DEVELOPMENT_DATA_WARNING = (
-    "현재 구절 수는 과제 제출 기준인 100개 미만이며 개발 테스트용 데이터입니다."
+    "현재 생성된 데이터 포인트 수는 과제 제출 기준인 100개 미만이며 개발 테스트용 데이터입니다."
 )
 DEFAULT_VERSES_PATH = Path(__file__).with_name("verses.txt")
 
@@ -123,10 +123,15 @@ def main() -> int:
         print(f"오류: {error}", file=sys.stderr)
         return 1
 
-    if len(verses) < MINIMUM_SUBMISSION_VERSES:
+    schedule = make_schedule(verses, args.start_date)
+
+    # 과제 제출 기준은 구절 개수가 아니라 날짜별 시계열 데이터 포인트 개수다.
+    # 복습 간격(D+0~D+30)이 곱해지므로 구절 수보다 항상 많거나 같다.
+    print(f"구절 수: {len(verses)}", file=sys.stderr)
+    print(f"데이터 포인트 수(날짜 문서): {len(schedule)}", file=sys.stderr)
+    if len(schedule) < MINIMUM_SUBMISSION_DATA_POINTS:
         print(f"경고: {DEVELOPMENT_DATA_WARNING}", file=sys.stderr)
 
-    schedule = make_schedule(verses, args.start_date)
     print(json.dumps(schedule, ensure_ascii=False, indent=2))
     return 0
 
