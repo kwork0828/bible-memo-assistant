@@ -491,19 +491,20 @@ Python 파일을 수정한 후 가능하면 py_compile 또는 실제 import/실�
 * `main`이 통합 기준 브랜치다. `feat/frontend`(구현이 가장 앞선 브랜치)를
   기준으로 2026-09-18에 새로 만들고, `feat/firebase`의 VerseMate 화면과
   테스트를 그 위로 옮겨 합쳤다.
-* GitHub Default Branch를 `main`으로 변경했다. (변경 직후 원격에서
-  `feat/setup`으로 확인된 적이 있다. 새 세션은 `git ls-remote --symref
-  origin HEAD`로 실제 반영 여부를 먼저 확인한다.)
+* GitHub Default Branch를 `main`으로 변경 완료(2026-09-18, 사용자가
+  직접). `git ls-remote --symref origin HEAD`와 GitHub 커밋 검색
+  API로 교차 확인했다. AI가 이 값을 직접 바꿀 수 있는 API/도구는 이
+  세션 구성에 없으므로, 바뀐 것처럼 보이지 않으면 먼저 위 명령으로
+  실제 반영 여부를 확인하고 사용자에게 확인을 요청한다.
 * 과거에 갈라진 중복 브랜치 8개(`feat/setup`, `feat/api`, `feat/data`,
   `feat/conversations`, `feat/chat`, `feat/firestore-api`, `feat/ai-chat`,
-  `feat/frontend`)가 아직 원격에 남아 있다. 삭제를 시도했으나 이 작업
-  환경의 GitHub 자격증명에 브랜치 삭제 권한이 없어(push 403) 실패했다.
-  **GitHub 웹에서 사용자가 직접 삭제해야 한다.** 이 중 `feat/data`,
-  `feat/conversations`, `feat/chat`은 main에 없는 별도 커밋 이력이다
-  (기능은 main에 이미 더 완전한 형태로 있음). 나머지 5개는 main의
-  조상이라 삭제해도 정보 손실이 없다.
+  `feat/frontend`)는 사용자가 GitHub 웹에서 직접 삭제 완료(2026-09-18).
+  AI 쪽 GitHub 자격증명에는 브랜치 삭제 권한이 없어(`git push
+  --delete`가 GitHub로부터 직접 403을 받음) 삭제를 대신할 수 없었다.
 * `feat/firebase`는 의도적으로 보존한다. VerseMate 화면의 원본 커밋
   이력이며, main에는 내용만 재작성돼 들어갔다(커밋 이력 자체는 다름).
+* 지금 GitHub에 남은 브랜치는 `main`, `feat/firebase`,
+  `claude/fervent-keller-0biri0`(세션 작업 브랜치) 3개뿐이다.
 
 ### 백엔드 (FastAPI)
 
@@ -516,7 +517,16 @@ Python 파일을 수정한 후 가능하면 py_compile 또는 실제 import/실�
 * 테스트 53개, 전부 통과 확인(`python -m unittest discover -s tests -t .`).
   Firestore·AI는 가짜 클라이언트로 대체해 실제 외부 연결 없이 검증한다.
 * Firestore 실연결, AI 모델 목록 조회 및 실제 `/api/chat` 호출은
-  **아직 검증 전**이다.
+  **아직 검증 전**이다. `backend/.env`와 Firebase 서비스 계정 파일이
+  Git에 없어서(의도된 정상 상태) 이 저장소를 새로 연 환경에서는
+  이 검증을 대신할 수 없다. 사용자가 본인 PC에서 직접 진행해야 한다.
+* 알아둘 것: 이 requirements.txt의 FastAPI(0.141.1)에서는
+  `include_router`로 등록한 하위 라우트가 `app.routes`에 `APIRoute`로
+  바로 노출되지 않고 내부 전용 `_IncludedRouter`로 감싸진다.
+  `app.routes`를 직접 순회하는 코드는 라우트를 못 찾을 수 있다
+  (`scripts/check_api_routes.py`에서 실제로 발생했던 버그, 수정
+  완료). 라우트 확인은 `app.routes` 대신 `app.openapi()["paths"]`를
+  쓴다 — 내부 구현이 바뀌어도 안정적이다.
 
 ### 프론트엔드
 
@@ -539,8 +549,14 @@ Python 파일을 수정한 후 가능하면 py_compile 또는 실제 import/실�
 
 ### 배포
 
-* Render/Vercel 배포 설정 파일이 아직 없다(`render.yaml`,
-  `vercel.json` 등 저장소에 없음).
+* `render.yaml`(백엔드), `vercel.json`(프론트엔드), `docs/deploy.md`
+  (실제 배포 절차)를 추가했다(2026-09-18).
+* 실제 배포(Render/Vercel 계정 연결, 환경변수 입력, Deploy 클릭)는
+  아직 안 했다. 계정 로그인이 필요한 작업이라 AI가 대신할 수 없고,
+  `docs/deploy.md`대로 사용자가 직접 진행해야 한다.
+* `render.yaml`의 시작 명령(`python -m uvicorn backend.main:app
+  --host 0.0.0.0 --port $PORT`)은 이 저장소에서 실제로 기동해
+  `/health`가 200을 반환하는 것까지 확인했다.
 
 ### 개발환경
 

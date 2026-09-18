@@ -26,13 +26,17 @@ EXPECTED_ROUTES = {
 
 
 def main() -> int:
-    actual_routes: set[tuple[str, str]] = set()
-
-    for route in app.routes:
-        methods = getattr(route, "methods", None) or set()
-        path = getattr(route, "path", "")
-        for method in methods:
-            actual_routes.add((method, path))
+    # app.routes를 직접 순회하지 않고 OpenAPI 스키마를 사용한다.
+    # FastAPI 0.141에서는 include_router로 등록한 하위 라우트가 app.routes에
+    # APIRoute로 바로 노출되지 않고 내부 전용 _IncludedRouter로 감싸진다.
+    # openapi()가 만드는 paths는 그런 내부 구현 변화와 무관하게 항상
+    # 실제 등록된 API 경로를 반영하므로 더 안정적이다.
+    paths = app.openapi().get("paths", {})
+    actual_routes: set[tuple[str, str]] = {
+        (method.upper(), path)
+        for path, operations in paths.items()
+        for method in operations
+    }
 
     missing = sorted(EXPECTED_ROUTES - actual_routes)
     if missing:

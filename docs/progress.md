@@ -113,9 +113,16 @@
   - 실제 존재하는 모델명을 `OPENAI_MODEL`에 설정
   - JSON mode 및 `max_tokens` 호환성 실제 테스트
 
-### 8단계 Render 배포 — 미진행
+### 8단계 Render 배포 — 설정 파일 준비 완료, 실제 배포는 미진행
 
-- 실제 외부 공개 배포는 승인 게이트로 남겨둠
+- 저장소 루트에 `render.yaml` 추가(2026-09-18)
+- 시작 명령 `python -m uvicorn backend.main:app --host 0.0.0.0 --port
+  $PORT`이 실제로 기동해 `/health`가 200을 반환하는 것까지 확인
+- API 키, Firebase 서비스 계정 값은 `sync: false`로 표시해 저장소에
+  값을 남기지 않고 Render 대시보드에서 직접 입력하도록 함
+- 절차는 `docs/deploy.md` 1·3단계 참고
+- 실제 외부 공개 배포(Render 계정 연결, Deploy 클릭)는 승인 게이트로
+  남겨둠. 계정 로그인이 필요해 AI가 대신할 수 없음
 - Firebase/AI 실제 연결 검증 후 진행
 
 ### 9단계 Vanilla Frontend — 구현 완료, 브라우저 통합 테스트 필요
@@ -137,8 +144,13 @@
 - 사용자 데이터를 DOM에 넣을 때 `textContent`를 사용해 단순 HTML 삽입을 피함
 - 남은 검증: 실제 FastAPI와 브라우저 연결 후 전체 흐름 확인
 
-### 10단계 Vercel 배포 — 미진행
+### 10단계 Vercel 배포 — 설정 파일 준비 완료, 실제 배포는 미진행
 
+- 저장소 루트에 `vercel.json` 추가(2026-09-18). `outputDirectory:
+  frontend`로 지정해 별도 빌드 명령 없이 `frontend/` 폴더를 정적
+  사이트로 서비스하도록 함
+- 절차는 `docs/deploy.md` 2단계 참고
+- 실제 Vercel 계정 연결과 Deploy 클릭은 승인 게이트로 남겨둠
 - Frontend 로컬 통합 테스트 이후 공개 배포 예정
 
 ### 11단계 README / 캡처 / 제출 — 일부만 준비
@@ -165,10 +177,14 @@ feat/ 브랜치를 다시 합치는 규칙이 없었던 점)는 AGENTS.md 6조�
 
 과거에 갈라졌던 브랜치 8개(`feat/setup`, `feat/api`, `feat/data`,
 `feat/conversations`, `feat/chat`, `feat/firestore-api`, `feat/ai-chat`,
-`feat/frontend`)는 삭제 대상이지만, 이 작업 환경의 GitHub 자격증명으로는
-브랜치 삭제 권한이 없어(push 시 403) 아직 원격에 남아 있다. GitHub
-웹에서 사용자가 직접 삭제해야 한다. `feat/firebase`는 원본 커밋 이력
-보존을 위해 의도적으로 남겨둔다.
+`feat/frontend`)는 삭제 대상이었다. 이 작업 환경의 GitHub 자격증명에는
+브랜치 삭제 권한이 없어(push 시 403) AI가 대신 삭제할 수 없었고,
+사용자가 GitHub 웹에서 직접 8개를 모두 삭제했다(2026-09-18 완료).
+
+GitHub Default Branch도 같은 날 `main`으로 변경 완료했다. 지금 GitHub에
+남은 브랜치는 `main`, `feat/firebase`(원본 커밋 이력 보존 목적으로
+의도적으로 유지), `claude/fervent-keller-0biri0`(세션 작업 브랜치)
+3개뿐이다.
 
 ---
 
@@ -208,10 +224,19 @@ Major가 남아 있으므로 구현 코드는 많이 진행됐지만 아직 최�
 
 ### Normal
 
-- Render/Vercel 배포 설정
+- Render/Vercel 실제 배포 (설정 파일은 준비 완료, `docs/deploy.md` 참고)
 - 100개 이상 최종 데이터 확장
-- 과거 중복 브랜치 8개 삭제 (GitHub 웹에서 사용자가 직접, 3장 참고)
 - README / 캡처 / 발표 문서
+
+### 완료된 항목 (참고용)
+
+- 과거 중복 브랜치 8개 삭제, Default Branch를 `main`으로 변경
+  (2026-09-18)
+- `make_schedule.py` 검증 기준을 구절 수 → 날짜 문서 수로 수정
+- `scripts/check_api_routes.py`가 FastAPI 0.141의 내부 라우트 표현
+  방식 때문에 아무 라우트도 못 찾던 버그 수정 (`app.openapi()` 기준으로
+  변경)
+- `render.yaml`, `vercel.json`, `docs/deploy.md` 추가
 
 ---
 
@@ -243,14 +268,14 @@ Major가 남아 있으므로 구현 코드는 많이 진행됐지만 아직 최�
 
 ## 8. 다음 개발 순서
 
-1. 과거 중복 브랜치 8개 GitHub에서 삭제 (사용자 직접, 3장 참고)
-2. 실제 Firebase 연결 및 CRUD 통합 검증
-3. AI 모델 목록 조회 및 chat 실호출 검증
-4. Frontend 전체 흐름 검증 (index.html, admin.html 둘 다)
-5. Render 배포
-6. Vercel 배포
-7. 100개 이상 시계열 데이터 확장 (구절 70개 이상이면 날짜 문서 100개 이상)
-8. README / 캡처 / 제출 요건 체크
+1. 실제 Firebase 연결 및 CRUD 통합 검증 (본인 PC, `docs/deploy.md`
+   "로컬에서 미리 검증하고 싶다면" 참고)
+2. AI 모델 목록 조회 및 chat 실호출 검증 (본인 PC)
+3. Frontend 전체 흐름 검증 (index.html, admin.html 둘 다)
+4. Render 배포 (`render.yaml` 준비 완료, `docs/deploy.md` 1·3단계)
+5. Vercel 배포 (`vercel.json` 준비 완료, `docs/deploy.md` 2단계)
+6. 100개 이상 시계열 데이터 확장 (구절 70개 이상이면 날짜 문서 100개 이상)
+7. README / 캡처 / 제출 요건 체크
 
 ---
 

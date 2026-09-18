@@ -1,0 +1,40 @@
+# Render Blueprint. Render 대시보드에서 "New +" → "Blueprint" →
+# 이 저장소 선택 시 아래 설정으로 서비스가 자동 생성된다.
+#
+# 여기 적힌 값은 API 키나 서비스 계정 JSON이 아니다. 실제 값은 이 파일이
+# 아니라 Render 대시보드의 Environment 탭에서 직접 입력한다
+# (sync: false로 지정한 항목은 Render가 값을 요구만 하고 저장소에
+# 쓰지 않는다).
+services:
+  - type: web
+    name: bible-memo-assistant-api
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r backend/requirements.txt
+    # python -m uvicorn을 쓰는 이유: 저장소 루트가 PYTHONPATH에 잡혀야
+    # `from backend.routers...` 같은 절대 임포트가 동작한다. python -m은
+    # 현재 작업 디렉터리를 sys.path에 자동으로 넣어준다.
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.15
+      - key: AI_PROVIDER
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENAI_MODEL
+        sync: false
+      - key: AI_MAX_OUTPUT_TOKENS
+        value: "500"
+      - key: AI_MAX_RETRIES
+        value: "2"
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
+      # Vercel에 프론트엔드를 배포한 뒤 실제 주소로 바꾼다.
+      # 여러 주소는 쉼표로 구분한다.
+      - key: ALLOWED_ORIGINS
+        sync: false
