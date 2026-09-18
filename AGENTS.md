@@ -106,13 +106,34 @@ feat/ 접두어는 Git의 필수 규칙이 아니라 관리 편의를 위한 관
 
 예:
 
-* feat/setup
 * feat/data
-* feat/api
 * feat/chat
-* feat/frontend
 
 main 브랜치에는 직접 개발하지 않는다.
+
+**중요: feat/ 브랜치는 반드시 main에서 분기하고, 작업이 끝나면 main으로 다시 합친다.**
+
+2026-09 중순까지는 이 규칙이 지켜지지 않아 feat/setup, feat/api, feat/data,
+feat/conversations, feat/chat, feat/firestore-api, feat/ai-chat, feat/frontend,
+feat/firebase까지 브랜치 9개가 서로 합쳐지지 않은 채 각자 갈라져 나갔다.
+그 결과 같은 백엔드(API)가 세 번 따로 구현됐다.
+
+원인은 다음 두 가지였다.
+
+1. GitHub 저장소의 Default Branch가 한동안 main이 아니라 feat/setup으로
+   설정돼 있었다. 새 세션이 저장소를 열 때마다 커밋 4개짜리 가장 이른
+   상태에서 시작했다.
+2. "main에는 직접 개발하지 않는다"는 규칙만 있고 "다시 합친다"는 규칙이
+   없어서, 각 세션이 새 feat/ 브랜치를 만들고 끝내는 지점에서 멈췄다.
+
+2026-09-18에 feat/frontend를 기준으로 main을 새로 만들고
+(feat/firebase의 화면은 그 위에 옮겨 합쳤다), GitHub Default Branch도
+main으로 바꿨다. 이제부터 다음을 지킨다.
+
+* 새 세션은 항상 origin/main에서 새 feat/ 브랜치를 만든다.
+* 작업이 끝나면 그 브랜치를 main에 병합(merge 또는 PR)하고, 병합이
+  끝난 브랜치는 삭제한다.
+* main에서 벗어난 채로 다음 세션까지 남겨두지 않는다.
 
 ---
 
@@ -458,30 +479,72 @@ Python 파일을 수정한 후 가능하면 py_compile 또는 실제 import/실�
 
 ## 24. 현재 작업 상태
 
-현재까지 확인된 내용:
+마지막 갱신: 2026-09-18. 이 절은 실제로 확인된 저장소 상태만 적는다.
+모델의 이전 완료 주장이 아니라 커밋·diff·실행 결과를 기준으로 삼는다.
 
-* Python 3.13.15 설치
-* 프로젝트 폴더 생성
-* git init 완료
-* main 브랜치 생성
-* feat/setup 브랜치 사용 예정
-* backend/routers 생성
-* backend/services 생성
-* .venv 생성
-* Windows PowerShell 실행 정책 문제 경험
-* Windows Terminal 설치
-* PowerShell 7 설치
-* Oh My Posh 설치
-* .gitignore 생성 진행
+### 브랜치
 
-다음 중요한 개발환경 검증:
+* `main`이 통합 기준 브랜치다. `feat/frontend`(구현이 가장 앞선 브랜치)를
+  기준으로 2026-09-18에 새로 만들고, `feat/firebase`의 VerseMate 화면과
+  테스트를 그 위로 옮겨 합쳤다.
+* GitHub Default Branch를 `main`으로 변경했다. (변경 직후 원격에서
+  `feat/setup`으로 확인된 적이 있다. 새 세션은 `git ls-remote --symref
+  origin HEAD`로 실제 반영 여부를 먼저 확인한다.)
+* 과거에 갈라진 중복 브랜치 8개(`feat/setup`, `feat/api`, `feat/data`,
+  `feat/conversations`, `feat/chat`, `feat/firestore-api`, `feat/ai-chat`,
+  `feat/frontend`)가 아직 원격에 남아 있다. 삭제를 시도했으나 이 작업
+  환경의 GitHub 자격증명에 브랜치 삭제 권한이 없어(push 403) 실패했다.
+  **GitHub 웹에서 사용자가 직접 삭제해야 한다.** 이 중 `feat/data`,
+  `feat/conversations`, `feat/chat`은 main에 없는 별도 커밋 이력이다
+  (기능은 main에 이미 더 완전한 형태로 있음). 나머지 5개는 main의
+  조상이라 삭제해도 정보 손실이 없다.
+* `feat/firebase`는 의도적으로 보존한다. VerseMate 화면의 원본 커밋
+  이력이며, main에는 내용만 재작성돼 들어갔다(커밋 이력 자체는 다름).
 
-1. PowerShell 7에서 프로젝트 폴더 이동
-2. .venv 활성화
-3. 필수 패키지 설치
-4. import 검증
-5. requirements.txt 생성
-6. git status 보안 확인
+### 백엔드 (FastAPI)
+
+* `backend/main.py`, `config.py`, `firebase_client.py`, `models.py` 구성
+  완료.
+* `routers/data.py`, `routers/conversations.py`, `routers/chat.py`,
+  `services/summary.py`, `services/openai_client.py` 구현 완료.
+* API 8개 경로가 OpenAPI에 등록됨: `/api/data`(CRUD), `/api/data/summary`,
+  `/api/conversations`(CRUD), `/api/chat`.
+* 테스트 53개, 전부 통과 확인(`python -m unittest discover -s tests -t .`).
+  Firestore·AI는 가짜 클라이언트로 대체해 실제 외부 연결 없이 검증한다.
+* Firestore 실연결, AI 모델 목록 조회 및 실제 `/api/chat` 호출은
+  **아직 검증 전**이다.
+
+### 프론트엔드
+
+* `frontend/index.html` + `app.js` + `styles.css`/`library.css`/
+  `routine.css` = VerseMate 사용자 화면(검색, TTS, QUIZ, 말씀 루틴,
+  기록). 사이드바에 "데이터 관리" 링크로 admin 화면과 연결.
+* `frontend/admin.html` + `admin.js` + `style.css` = 기존 API 연동
+  관리 화면(데이터/대화 CRUD, 요약, 채팅). 이름만 바뀌었고 기능은
+  그대로다.
+* 두 화면 모두 Chromium으로 정적 로드·화면 전환까지만 확인했고,
+  실제 백엔드에 붙여 전체 흐름을 검증하지는 않았다.
+
+### 데이터
+
+* `scripts/verses.txt`는 아직 개발용 5개 구절이다.
+* `scripts/make_schedule.py`의 100개 경고 기준은 **구절 개수**를 본다.
+  하지만 과제 요건은 **날짜 문서(시계열 데이터 포인트) 100개 이상**이다.
+  현재 계산상 구절 70개면 날짜 문서 100개를 넘는다. 이 경고 기준을
+  날짜 문서 수로 바꾸는 작업이 아직 남아 있다.
+
+### 배포
+
+* Render/Vercel 배포 설정 파일이 아직 없다(`render.yaml`,
+  `vercel.json` 등 저장소에 없음).
+
+### 개발환경
+
+* 로컬(Windows): Python 3.13.15, PowerShell 7.6.6, Windows Terminal,
+  Oh My Posh, `.venv` 사용.
+* 원격(Claude Code on the web): `.claude/hooks/session-start.sh`가
+  세션 시작 시 `.venv`를 만들고 `backend/requirements.txt`를 설치한다.
+  로컬 PowerShell 워크플로에는 영향을 주지 않는다.
 
 ---
 

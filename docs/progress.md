@@ -6,7 +6,7 @@
 - Terminal: Windows Terminal / PowerShell
 - Python: 집 PC 3.13.15, 노트북 3.14.7에서 필수 패키지 import 확인
 - Git / GitHub 사용 중
-- 최신 통합 작업 브랜치: `feat/frontend`
+- 통합 기준 브랜치: `main` (2026-09-18부터, GitHub Default Branch도 `main`)
 - GitHub 저장소: `kwork0828/bible-memo-assistant`
 - 저장소 공개 여부: Public
 
@@ -150,17 +150,25 @@
 
 ## 3. 현재 브랜치 흐름
 
-현재 구현 흐름은 다음처럼 선형으로 이어진다.
+2026-09-10 ~ 09-14 사이에 `feat/setup` → `feat/api`에서 두 갈래로 갈라져
+같은 백엔드(data/conversations/chat API)가 서로 다른 구현으로 두 번
+만들어졌다. 그중 한 갈래(`feat/firestore-api` → `feat/ai-chat` →
+`feat/frontend`)가 가장 완성도가 높았고, 별도로 `feat/firebase`가
+VerseMate 사용자 화면을 만들었다.
 
-`feat/setup`
-→ `feat/api`
-→ `feat/firebase`
-→ `feat/firestore-api`
-→ `feat/ai-chat`
-→ `feat/frontend`
+2026-09-18에 `feat/frontend`를 기준으로 `main`을 새로 만들고,
+`feat/firebase`의 화면과 테스트를 그 위로 옮겨 합쳤다. **지금부터는
+`main`이 유일한 통합 기준이다.**
 
-각 뒤 브랜치는 앞 브랜치의 변경을 포함한다.
-현재 가장 많은 기능이 들어 있는 브랜치는 `feat/frontend`이다.
+원인이 됐던 문제 두 가지(GitHub Default Branch가 `feat/setup`이었던 점,
+feat/ 브랜치를 다시 합치는 규칙이 없었던 점)는 AGENTS.md 6조에 반영했다.
+
+과거에 갈라졌던 브랜치 8개(`feat/setup`, `feat/api`, `feat/data`,
+`feat/conversations`, `feat/chat`, `feat/firestore-api`, `feat/ai-chat`,
+`feat/frontend`)는 삭제 대상이지만, 이 작업 환경의 GitHub 자격증명으로는
+브랜치 삭제 권한이 없어(push 시 403) 아직 원격에 남아 있다. GitHub
+웹에서 사용자가 직접 삭제해야 한다. `feat/firebase`는 원본 커밋 이력
+보존을 위해 의도적으로 남겨둔다.
 
 ---
 
@@ -202,41 +210,51 @@ Major가 남아 있으므로 구현 코드는 많이 진행됐지만 아직 최�
 
 - Render/Vercel 배포 설정
 - 100개 이상 최종 데이터 확장
+- `scripts/make_schedule.py`의 100개 경고 기준을 구절 개수에서 날짜
+  문서(시계열 데이터 포인트) 개수로 수정 — 현재는 서로 다른 값을 기준으로
+  경고한다
+- 과거 중복 브랜치 8개 삭제 (GitHub 웹에서 사용자가 직접, 3장 참고)
 - README / 캡처 / 발표 문서
 
 ---
 
 ## 6. 다음에 개인 PC에서 가장 먼저 할 검증
 
-1. 최신 `feat/frontend` 받기
+1. 최신 `main` 받기 (`feat/frontend`가 아니라 `main`)
 2. `scripts/setup_local_firebase_env.py` 실행
 3. `scripts/check_firebase.py` 실행
 4. `scripts/check_api_routes.py` 실행
 5. Uvicorn 실행 후 Swagger에서 data / conversations 실제 CRUD 테스트
 6. 실제 Provider 정보가 준비되면 `scripts/list_ai_models.py` 실행
 7. 실제 존재 모델 설정 후 `/api/chat` 한 건 테스트
-8. `frontend/index.html`을 브라우저에서 열고 전체 흐름 확인
+8. `frontend/index.html`(사용자 화면)과 `frontend/admin.html`(데이터
+   관리 화면)을 브라우저에서 열고 전체 흐름 확인
 
 ---
 
 ## 7. 진행률 해석
 
-- 코드 구현량 기준: 약 70% 수준
+- 코드 구현량 기준: 약 75% 수준 (브랜치 통합, 화면 합류, 테스트 53개로
+  증가했으나 새 기능이 늘어난 것은 아니다)
 - 실제 검증·배포·제출까지 포함한 완성도 기준: 약 55~60% 수준
+  (Blocker/Major는 그대로 남아 있다)
 
 구현량과 완료 판정을 구분한다. 모델이나 문서의 “완료” 주장보다 실제 실행 증거를 우선한다.
+브랜치가 하나로 합쳐졌다고 해서 Firebase/AI 실연결 검증까지 끝난 것은 아니다.
 
 ---
 
 ## 8. 다음 개발 순서
 
-1. 실제 Firebase 연결 및 CRUD 통합 검증
-2. AI 모델 목록 조회 및 chat 실호출 검증
-3. Frontend 전체 흐름 검증
-4. Render 배포
-5. Vercel 배포
-6. 100개 이상 시계열 데이터 확장
-7. README / 캡처 / 제출 요건 체크
+1. 과거 중복 브랜치 8개 GitHub에서 삭제 (사용자 직접, 3장 참고)
+2. 실제 Firebase 연결 및 CRUD 통합 검증
+3. AI 모델 목록 조회 및 chat 실호출 검증
+4. Frontend 전체 흐름 검증 (index.html, admin.html 둘 다)
+5. `scripts/make_schedule.py` 100개 경고 기준을 날짜 문서 수로 수정
+6. Render 배포
+7. Vercel 배포
+8. 100개 이상 시계열 데이터 확장 (구절 70개 이상이면 날짜 문서 100개 이상)
+9. README / 캡처 / 제출 요건 체크
 
 ---
 
